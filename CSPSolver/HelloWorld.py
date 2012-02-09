@@ -8,7 +8,7 @@ from collections import namedtuple
 from copy import copy, deepcopy
 from VariableDomain import VariableDomain
 
-def timef( funcname, *args, **kwargs ):
+def timef(funcname, *args, **kwargs):
 	"""
 	timeit a func with args, e.g.
 		for window in ( 3, 31, 63, 127, 255 ):
@@ -17,7 +17,7 @@ def timef( funcname, *args, **kwargs ):
 	__main__" in Stackoverflow        
 	"""
 	argstr = ", ".join(["%r" % a for a in args]) if args else ""
-	kwargstr = ", ".join([ "%s=%r" % (k,v) for k,v in kwargs.items()]) \
+	kwargstr = ", ".join([ "%s=%r" % (k, v) for k, v in kwargs.items()]) \
 		if kwargs  else ""
 	comma = ", " if (argstr and kwargstr)  else ""
 	fargs = "%s(%s%s%s)" % (funcname, argstr, comma, kwargstr)
@@ -25,26 +25,61 @@ def timef( funcname, *args, **kwargs ):
 	print("from __main__ import %s" % funcname)
 	t = timeit.Timer(fargs, "from __main__ import %s" % funcname)
 	ntime = 3
-	print("%.0f microsecond %s" % (t.timeit( ntime ) * 1e6 / ntime, fargs))
+	print("%.0f microsecond %s" % (t.timeit(ntime) * 1e6 / ntime, fargs))
 
 
 		
 
 def main():	
-	variableNames = ['v1', 'v2', 'v3']
-	variableDomains = [VariableDomain(0,1), VariableDomain(0,0), VariableDomain(1,0)]
-	Store = namedtuple('Store', variableNames)
-	store = Store._make(variableDomains)
-	z = zip(variableNames, variableDomains)
-	d = dict(z)
+	
 	def test():
-		print(isinstance(1, VariableDomain))
+		pass
+	
+	deps = []
+	idx = [0, 0, 0, 0, 0, 0]
+
+	def subscribe(p, condition):
+		# there are a maximum of 5 propgation conditions, and an end idx
+		for i in reversed(range(condition + 1, 6)):
+			idx[i] += 1
+		deps.insert(idx[condition], p)
+	
+	def cancel(p, condition):
+		"""Cancels propagator suscribed to condition"""
+		# will return an error if there is no such propagator
+		i = idx[condition] + deps[idx[condition]:idx[condition+1]+1].index(p)
+		deps.pop(i)
+		for i in reversed(range(condition + 1, 6)):
+			idx[i] -= 1
+	
+	def schedule(conditionStart, conditionEnd):
+		"""Schedules propagators that depent on conditionStart to conditionEnd"""
+		for i in range(idx[conditionStart], idx[conditionEnd+1] - 1):
+			# add propagator to the queue
+			pass
 			
+	
+	
+	subscribe("v44", 4)
+	subscribe("v0", 0)
+	subscribe("v00", 0)
+	subscribe("v333", 3)
+	subscribe("v1", 1)
+	subscribe("v11", 1)
+	subscribe("v2", 2)
+	subscribe("v000", 0)
+	subscribe("v3", 3)
+	subscribe("v33", 3)
+	subscribe("v4", 4)
+	cancel("v4", 4)
+	schedule(0,4)
+	
+	print(deps)
+	print(idx)
 		
-		
-	counts = [10,100,1000,10000]
+	counts = [10, 100, 1000, 10000]
 	for count in counts:
-		print('n='+str(count)+': '+str(min(timeit.Timer(test).repeat(7, count)) / count))
+		print('n=' + str(count) + ': ' + str(min(timeit.Timer(test).repeat(7, count)) / count))
 	
 
 main()
