@@ -17,11 +17,15 @@ Created on Feb 4, 2012
 0: {asn}
 
 (Simplified) Modification events
-4: {asn, lbc, ubc, dmc}
-3: {lbc, ubc, dmc}
-2: {lbc, dmc}
-1: {ubc, dmc}
-0: {dmc}
+4: {asn, lbc, ubc, dmc} schedule(0, 4)
+3: {lbc, ubc, dmc} (bbc) schedule(1, 4)
+2: {lbc, dmc} (lbc) schedule(1, 1); schedule(3, 4)
+1: {ubc, dmc} (ubc) schedule(2, 4)
+0: {dmc} (inner) schedule(4, 4)
+
+notify(mod event)
+	if asn then schedule(
+
 
 
 fixpoint()
@@ -41,27 +45,56 @@ without overhead if they store all the propagators in one array. This is C++
 code btw, so this may not be useful in pure python coding.
 
 """
-
-
-	
-
-
 class EmptyVariableDomain:
+	"""For fast copying"""
 	__slots__ = ('lb', 'ub', 'assigned', 'failed')
 
-class VariableDomain:
-	"""Implements a event system similar to the Observer Pattern"""
-	__slots__ = ('lb', 'ub', 'assigned', 'failed', 'space', 'idx', 'deps')
-	def __init__(self, lb, ub):
+class VariableDomain():
+	"""
+	VariableDomain is the domain that an integer variable can take. There are
+	no holes allowed in this type of domain. Because there are no holes the
+	domain can be represented as a lower and upper bound.
+	
+	A VariableDomain can be failed, meaning it can contain no values.
+	
+	A VariableDomain can be assigned, meaning it can contain only one value.
+	
+	A VariableDomain schedules propagators to be run based on how the
+	VariableDomain has been changed. To do this it has callbacks that occur
+	when either the lower or upper bound is changed.
+	"""
+	__slots__ = ('lb', 'ub', 'assigned', 'failed', '_propagatorQueue','_idx', '_deps')
+	def __init__(self, lb, ub, pq):
 		self.lb = lb
 		self.ub = ub
 		self.assigned = lb == ub
 		self.failed = lb > ub
-		self.space = None
+		self._propagatorQueue = pq
+		# indexed dependency array
 		self._idx = [0, 0, 0, 0, 0, 0]
 		self._deps = []
 	
-	def copy(self):
+	def setlb(self, lb):
+		if lb > self.lb:
+			self.lb = lb
+			if lb == self.ub:
+				self.notify(4)
+			elif lb < self.ub:
+				self.notify(2)
+			else:
+				self.failed = True
+				
+	def setub(self, ub):
+		if ub < self.ub:
+			self.ub = ub
+			if ub == self.lb:
+				self.notify(4)
+			elif ub > self.lb:
+				self.notify(1)
+			else:
+				self.failed = True
+	
+	def copy(self, pq):
 		"""Returns a copy of this VariableDomain"""
 		copy = EmptyVariableDomain()
 		copy.__class__ = self.__class__
@@ -70,12 +103,19 @@ class VariableDomain:
 		copy.ub = self.ub
 		copy.assigned = self.assigned
 		copy.failed = self.failed
-		copy.space = self.space
+		copy._propagatorQueue = pq
+		# might be dangerous since we assume dependencies don't change
+		copy._idx = [0, 0, 0, 0, 0, 0]
+		copy._deps = []
 		
 		return copy
 	
 	def subscribe(self, p, condition):
 		"""Subscribe a propagator to this variable for condition"""
+		# note it is possible to subscribe the same propgator to a condition
+		# twice
+		# potential speedup: if subscribing to same condition, place item in
+		# the last possible position for that condition
 		idx = self._idx
 		deps = self._deps
 		# there are a maximum of 5 propgation conditions, and an end idx
@@ -87,15 +127,28 @@ class VariableDomain:
 		"""Cancels propagator suscribed to condition"""
 		idx = self._idx
 		deps = self._deps
-		# will return an error if there is no such propagator
+		# will raise a ValueError if there is no such propagator
 		i = idx[condition] + deps[idx[condition]:idx[condition+1]+1].index(p)
 		deps.pop(i)
 		for i in reversed(range(condition + 1, 6)):
 			idx[i] -= 1
-	
+			
+	def notify(self, modificationEvent):
+		"""Convenience method, but slower"""
+		if modificationEvent == 4:
+			self.schedule(0, 4)
+		elif modificationEvent == 3:
+			self.schedule(1, 4)
+		elif modificationEvent == 2:
+			self.schedule(1, 1)
+			self.schedule(3, 4)
+		elif modificationEvent == 1:
+			self.schedule(2, 4)
+		elif modificationEvent == 0:
+			self.schedule(4, 4)
+			
 	def schedule(self, conditionStart, conditionEnd):
 		"""Schedules propagators that depent on conditionStart to conditionEnd"""
 		idx = self._idx
-		for i in range(idx[conditionStart], idx[conditionEnd+1] - 1):
-			# add propagator to the queue
-			pass
+		for i in range(idx[conditionStart], idx[conditionEnd+1]):
+			self._propagatorQueue.append(self._deps[i])

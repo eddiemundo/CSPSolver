@@ -1,0 +1,25 @@
+General outline of CSPSolver
+
+To run the solver we first have to set up a variable store, a propagator queue
+and propagators and the dependencies between the propagators and the variables
+they care about.
+
+A variable store is a dictionary mapping variable names to VariableDomains. It
+essentially represents the domain of the problem.
+- VariableDomains contain the lower and upper bound of the variable as well as
+some other information like whether a variable domain is empty (failed) or
+assigned (contains exactly 1 value). The also fire events representing how they
+are changed and schedule propagators based on these events. In order to
+schedule these propagators the VariableDomains contain dependency information
+regarding the propagators. The dependency information are things like when
+a certain propagator should be scheduled (maybe the propagator depends only
+on whether the upper bound of the variable changes) 
+ 
+A propagator queue is a queue that contains propagators to be run on the
+current variable store. Propagators are added to this queue by VariableDomains
+when they are changed.
+
+The solver function itself takes a variable store, runs the propagators (which
+have access to this store), after the propagators have pruned the domain as
+much as they can, the solver splits the domain, and recursively runs itself
+on these split domains.
