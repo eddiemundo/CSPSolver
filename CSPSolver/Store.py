@@ -7,13 +7,25 @@ import collections
 from VariableDomain import VariableDomain
 
 class Store(collections.MutableMapping):
-	"""A dictionary containing VariableDomains"""
+	"""
+	A dictionary containing mapping variable names to VariableDomains.
+	
+	A store can be failed, meaning that one of its VariableDomains is the empty
+	set.
+	
+	A store can be assigned, meaning that all of its VariableDomains contain
+	exactly one value.
+	"""
 	def __init__(self, *args, **kwargs):
 		self.store = dict()
 		self.update(dict(*args, **kwargs))
+		self.failed = False
+		self.assigned = True
 		for v in self.store.values():
 			if not isinstance(v, VariableDomain):
 				raise TypeError
+			self.failed |= v.failed
+			self.assigned &= v.assigned
 	
 	def __getitem__(self, key):
 		return self.store[key]
@@ -29,7 +41,4 @@ class Store(collections.MutableMapping):
 	
 	def __len__(self):
 		return len(self.store)
-	
-	def copy(self):
-		return Store(self.store)
 		
