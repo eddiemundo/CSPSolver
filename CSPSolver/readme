@@ -30,7 +30,7 @@ A Propagator is essentially a class that contains a function that reduces the
 domain of the VariableDomains it cares about. It represents the constraints on
 the problem.
 
-The solver function itself takes a variable store, runs the propagators on the
+The solver function itself takes a variable store, runs the propagators in the
 propagator queue (which have access to this store), after the propagators have
 pruned the domain as much as they can, the solver splits the domain, and
 recursively runs itself on these split domains.
