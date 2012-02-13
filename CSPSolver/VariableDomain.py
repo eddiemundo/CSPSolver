@@ -47,7 +47,7 @@ code btw, so this may not be useful in pure python coding.
 """
 class EmptyVariableDomain:
 	"""For fast copying"""
-	__slots__ = ('lb', 'ub', 'assigned', 'failed')
+	__slots__ = ('lb', 'ub', 'assigned', '_propagatorQueue', '_idx', '_deps', '_solver')
 
 class VariableDomain():
 	"""
@@ -63,38 +63,48 @@ class VariableDomain():
 	VariableDomain has been changed. To do this it has callbacks that occur
 	when either the lower or upper bound is changed.
 	"""
-	__slots__ = ('lb', 'ub', 'assigned', 'failed', '_propagatorQueue','_idx', '_deps')
-	def __init__(self, lb, ub, pq):
+	__slots__ = ('lb', 'ub', 'assigned', '_propagatorQueue','_idx', '_deps', '_solver')
+	def __init__(self, lb, ub, pq=None):
 		self.lb = lb
 		self.ub = ub
 		self.assigned = lb == ub
-		self.failed = lb > ub
+		#self.failed = lb > ub
 		self._propagatorQueue = pq
 		# indexed dependency array
 		self._idx = [0, 0, 0, 0, 0, 0]
 		self._deps = []
+		# so we can fail a node faster. not sure if best architecture
+		self._solver = None
+	
+	def __repr__(self):
+		return str(tuple((self.lb, self.ub)))
+	
+	def __str__(self):
+		return self.__repr__()
 	
 	def setlb(self, lb):
 		if lb > self.lb:
 			self.lb = lb
 			if lb == self.ub:
+				self.assigned = True
 				self.notify(4)
 			elif lb < self.ub:
 				self.notify(2)
 			else:
-				self.failed = True
+				self._solver._nodeFailed = True
 				
 	def setub(self, ub):
 		if ub < self.ub:
 			self.ub = ub
 			if ub == self.lb:
+				self.assigned = True
 				self.notify(4)
 			elif ub > self.lb:
 				self.notify(1)
 			else:
-				self.failed = True
+				self._solver._nodeFailed = True
 	
-	def copy(self, pq):
+	def copy(self):
 		"""Returns a copy of this VariableDomain"""
 		copy = EmptyVariableDomain()
 		copy.__class__ = self.__class__
@@ -102,11 +112,13 @@ class VariableDomain():
 		copy.lb = self.lb
 		copy.ub = self.ub
 		copy.assigned = self.assigned
-		copy.failed = self.failed
-		copy._propagatorQueue = pq
-		# might be dangerous since we assume dependencies don't change
-		copy._idx = [0, 0, 0, 0, 0, 0]
-		copy._deps = []
+		copy._solver = self._solver
+		#copy.failed = self.failed
+		# here we assume dependencies don't change.
+		# this is WRONG for the general case if people want to write super
+		# clever propagators
+		copy._idx = self._idx #self._idx[:]
+		copy._deps = self._deps #self._deps[:]
 		
 		return copy
 	

@@ -97,6 +97,7 @@ class Test(unittest.TestCase):
 		self.assertTrue('ubc' in pq)
 		vd.setlb(5)
 		self.assertTrue('asn' in pq)
+		self.assertTrue(vd.assigned)
 		
 
 if __name__ == "__main__":
