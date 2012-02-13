@@ -4,9 +4,11 @@ Created on Feb 4, 2012
 @author: Shenra
 '''
 import timeit
-from collections import namedtuple
+from collections import namedtuple, deque
 from copy import copy, deepcopy
 from VariableDomain import VariableDomain
+from Store import Store
+
 
 def timef(funcname, *args, **kwargs):
 	"""
@@ -28,55 +30,21 @@ def timef(funcname, *args, **kwargs):
 	print("%.0f microsecond %s" % (t.timeit(ntime) * 1e6 / ntime, fargs))
 
 
-		
+class fakedict(dict):
+	__slots__ = ()
+
+
 
 def main():	
-	
+	pq = deque()
+	names = ['a']
+	values = [VariableDomain(0,0, pq)]
 	def test():
-		pass
-	
-	deps = []
-	idx = [0, 0, 0, 0, 0, 0]
-
-	def subscribe(p, condition):
-		# there are a maximum of 5 propgation conditions, and an end idx
-		for i in reversed(range(condition + 1, 6)):
-			idx[i] += 1
-		deps.insert(idx[condition], p)
-	
-	def cancel(p, condition):
-		"""Cancels propagator suscribed to condition"""
-		# will return an error if there is no such propagator
-		i = idx[condition] + deps[idx[condition]:idx[condition+1]+1].index(p)
-		deps.pop(i)
-		for i in reversed(range(condition + 1, 6)):
-			idx[i] -= 1
-	
-	def schedule(conditionStart, conditionEnd):
-		"""Schedules propagators that depent on conditionStart to conditionEnd"""
-		for i in range(idx[conditionStart], idx[conditionEnd+1] - 1):
-			# add propagator to the queue
-			pass
-			
-	
-	
-	subscribe("v44", 4)
-	subscribe("v0", 0)
-	subscribe("v00", 0)
-	subscribe("v333", 3)
-	subscribe("v1", 1)
-	subscribe("v11", 1)
-	subscribe("v2", 2)
-	subscribe("v000", 0)
-	subscribe("v3", 3)
-	subscribe("v33", 3)
-	subscribe("v4", 4)
-	cancel("v4", 4)
-	schedule(0,4)
-	
-	print(deps)
-	print(idx)
+		f = dict(zip(names, values))
+		f['a'] == values[0]
 		
+		#print(f['a'])
+	
 	counts = [10, 100, 1000, 10000]
 	for count in counts:
 		print('n=' + str(count) + ': ' + str(min(timeit.Timer(test).repeat(7, count)) / count))

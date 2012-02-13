@@ -6,7 +6,11 @@ Created on Feb 4, 2012
 import collections
 from VariableDomain import VariableDomain
 
+class EmptyStore(collections.MutableMapping):
+	__slots__ = ('store')
+
 class Store(collections.MutableMapping):
+	__slots__ = ('store')
 	"""
 	A dictionary containing mapping variable names to VariableDomains.
 	
@@ -19,13 +23,22 @@ class Store(collections.MutableMapping):
 	def __init__(self, *args, **kwargs):
 		self.store = dict()
 		self.update(dict(*args, **kwargs))
-		self.failed = False
-		self.assigned = True
+		#self.failed = False
+		#self.assigned = True
 		for v in self.store.values():
 			if not isinstance(v, VariableDomain):
 				raise TypeError
-			self.failed |= v.failed
-			self.assigned &= v.assigned
+		#	self.failed |= v.failed
+	#		self.assigned &= v.assigned
+	
+	def copy(self):
+		pass
+	
+	def __repr__(self):
+		return str(self.store)
+	
+	def __str__(self):
+		return self.__repr__()
 	
 	def __getitem__(self, key):
 		return self.store[key]
@@ -41,4 +54,15 @@ class Store(collections.MutableMapping):
 	
 	def __len__(self):
 		return len(self.store)
-		
+	
+	def assigned(self):
+		for vd in self.store.values():
+			if not vd.assigned:
+				return False
+		return True
+	
+	def failed(self):
+		for vd in self.store.values():
+			if vd.failed:
+				return True
+		return False
