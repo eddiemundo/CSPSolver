@@ -5,14 +5,14 @@ Created on Feb 10, 2012
 '''
 import unittest
 from collections import deque
-from VariableDomain import VariableDomain
+from Variable import Variable
 
 class Test(unittest.TestCase):
 
 
 	def test__init__(self):
 		pq = deque()
-		vd = VariableDomain(0,1, pq)
+		vd = Variable(0,1, pq)
 		# test assignments
 		self.assertEquals(vd.lb, 0)
 		self.assertEquals(vd.ub, 1)
@@ -23,17 +23,17 @@ class Test(unittest.TestCase):
 		self.assertEquals(vd._deps, [])
 		
 		# test branches
-		vd = VariableDomain(0, 0, pq)
+		vd = Variable(0, 0, pq)
 		self.assertEquals(vd.assigned, True)
 		self.assertEquals(vd.failed, False)
 		
-		vd = VariableDomain(1, 0, pq)
+		vd = Variable(1, 0, pq)
 		self.assertEquals(vd.failed, True)
 		self.assertEquals(vd.assigned, False)
 		
 	def testSuscribe(self):
 		pq = deque()
-		vd = VariableDomain(0, 0, pq)
+		vd = Variable(0, 0, pq)
 		vd.subscribe('p1', 4)
 		self.assertEquals(vd._idx[4], 0)
 		self.assertEquals(vd._deps[vd._idx[4]], 'p1')
@@ -51,7 +51,7 @@ class Test(unittest.TestCase):
 		
 	def testCancel(self):
 		pq = deque()
-		vd = VariableDomain(0, 0, pq)
+		vd = Variable(0, 0, pq)
 		vd.subscribe('p1', 4)
 		vd.subscribe('p2', 0)
 		vd.subscribe('p3', 0)
@@ -67,7 +67,7 @@ class Test(unittest.TestCase):
 		
 	def testSchedule(self):
 		pq = deque()
-		vd = VariableDomain(0, 0, pq)
+		vd = Variable(0, 0, pq)
 		vd.subscribe('p1', 4)
 		vd.subscribe('p2', 0)
 		vd.subscribe('p3', 0)
@@ -78,14 +78,14 @@ class Test(unittest.TestCase):
 		
 	def testSetters(self):
 		pq = deque()
-		vd = VariableDomain(0, 0, pq)
+		vd = Variable(0, 0, pq)
 		vd.subscribe('p1', 4)
 		vd.setlb(0)
 		self.assertFalse(pq)
 		vd.setub(-1)
 		self.assertTrue(vd.failed)
 		self.assertFalse(pq)
-		vd = VariableDomain(0, 10, pq)
+		vd = Variable(0, 10, pq)
 		vd.subscribe('asn', 0)
 		vd.subscribe('lbc', 1)
 		vd.subscribe('ubc', 2)

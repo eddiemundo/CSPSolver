@@ -6,7 +6,7 @@ Created on Feb 4, 2012
 class EmptyPropagator:
 	__slots__ = ()
 
-class Propagator:
+class AllDistinctPropagator:
 	__slots__ = ()
 	def __init__(self, store, variableNames):
 		self.store = store

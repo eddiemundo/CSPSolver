@@ -9,8 +9,8 @@ accepts the entire domain.
 '''
 
 
-from Store import Store
-from VariableDomain import VariableDomain
+
+from Variable import Variable
 from collections import deque
 import cProfile
 import pstats
@@ -114,10 +114,10 @@ def main():
 	
 	# set up the variable domains associated with the variableNames
 	variableDomains = [
-					VariableDomain(0, 20),
-					VariableDomain(0, 20),
-					VariableDomain(0, 20),
-					VariableDomain(0, 20),
+					Variable(0, 20),
+					Variable(0, 20),
+					Variable(0, 20),
+					Variable(0, 20),
 					]
 	
 	sudoku = Solver(variableNames, variableDomains)

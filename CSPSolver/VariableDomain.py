@@ -49,18 +49,18 @@ class EmptyVariableDomain:
 	"""For fast copying"""
 	__slots__ = ('lb', 'ub', 'assigned', '_propagatorQueue', '_idx', '_deps', '_solver')
 
-class VariableDomain():
+class Variable():
 	"""
-	VariableDomain is the domain that an integer variable can take. There are
+	Variable is the domain that an integer variable can take. There are
 	no holes allowed in this type of domain. Because there are no holes the
 	domain can be represented as a lower and upper bound.
 	
-	A VariableDomain can be failed, meaning it can contain no values.
+	A Variable can be failed, meaning it can contain no values.
 	
-	A VariableDomain can be assigned, meaning it can contain only one value.
+	A Variable can be assigned, meaning it can contain only one value.
 	
-	A VariableDomain schedules propagators to be run based on how the
-	VariableDomain has been changed. To do this it has callbacks that occur
+	A Variable schedules propagators to be run based on how the
+	Variable has been changed. To do this it has callbacks that occur
 	when either the lower or upper bound is changed.
 	"""
 	__slots__ = ('lb', 'ub', 'assigned', '_propagatorQueue','_idx', '_deps', '_solver')
@@ -105,7 +105,7 @@ class VariableDomain():
 				self._solver._nodeFailed = True
 	
 	def copy(self):
-		"""Returns a copy of this VariableDomain"""
+		"""Returns a copy of this Variable"""
 		copy = EmptyVariableDomain()
 		copy.__class__ = self.__class__
 		# copy instance variables
