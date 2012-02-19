@@ -5,33 +5,31 @@ Created on Feb 16, 2012
 '''
 import unittest
 from Variable import Variable
-from EventSystem import AsnDmcEventSystem
-from collections import deque, Counter
 
 class Test(unittest.TestCase):
 	"""Currently tests Variable only with the AsnDmcEventSystem"""
 	def setUp(self):
-		self.pq = deque()
-		self.es = AsnDmcEventSystem(self.pq)
-		self.es.subscribe('p0', 0)
-		self.es.subscribe('p1', 1)
-		self.v = Variable([0,1,2,3], self.es)
+		self.v = Variable('v1', range(21))
 		
-	def testVariableInit(self):
-		self.assertEquals(self.v._domain, set([0,1,2,3]))
+	def testInit(self):
+		self.assertEquals(self.v.name, 'v1')
+		self.assertEquals(self.v.domain, set(range(21)))
 		self.assertFalse(self.v.assigned)
-		self.assertIs(self.v._eventSystem, self.es)
 		
-	def testRemoveFromDomain(self):
-		self.v.removeFromDomain([0,1,3])
+	def testCopy(self):
+		v1_copy = self.v.copy()
+		self.assertEquals(v1_copy.name, self.v.name)
+		self.assertEquals(v1_copy.domain, self.v.domain)
+		self.assertFalse(v1_copy.assigned)
 		
-		self.assertEquals(self.v._domain, set([2]))
+	def testPruneFromDomain(self):
+		self.v.pruneFromDomain(range(2,21))
+		self.assertEquals(self.v.domain, set([0,1]))
+		self.assertFalse(self.v.assigned)
+		self.v.pruneFromDomain([0])
+		self.assertEquals(self.v.domain, set([1]))
 		self.assertTrue(self.v.assigned)
-		
-		self.assertTrue(len(self.pq) == 2)
-		self.assertIn('p1', self.pq)
-		self.assertIn('p0', self.pq)
-
+	
 if __name__ == "__main__":
 	#import sys;sys.argv = ['', 'Test.testName']
 	unittest.main()
