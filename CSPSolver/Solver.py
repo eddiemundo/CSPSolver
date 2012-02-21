@@ -46,13 +46,15 @@ def solve(s):
 		if (pair[0].propagate(pair[1], variable_store)):
 			return
 	
+	
 	if s.assigned():
 		print(s)
 		return
 	
-	# no domain failed check, may need to add for 
-	
+	# no domain failed check, done in the propagator loop 
+
 	(s1, s2) = branch(s)
+	
 	solve(s1)
 	solve(s2)
 
@@ -145,50 +147,49 @@ def main():
 	s = Space(variables_info)
 
 	# Setting up the Sudoku puzzle
-	s.variable_store['12'].assign(9)
-	s.variable_store['14'].assign(2)
-	s.variable_store['15'].assign(6)
-	s.variable_store['16'].assign(3)
-	s.variable_store['18'].assign(4)
+	s.variable_store['14'].assign(9)
+	s.variable_store['17'].assign(6)
+	s.variable_store['18'].assign(5)
+
+	s.variable_store['21'].assign(9)
+	s.variable_store['24'].assign(6)
+	s.variable_store['25'].assign(1)
+	s.variable_store['29'].assign(7)
 	
-	s.variable_store['24'].assign(8)
-	s.variable_store['26'].assign(5)
+	s.variable_store['35'].assign(2)
+	s.variable_store['37'].assign(1)
 	
-	s.variable_store['31'].assign(2)
-	s.variable_store['39'].assign(3)
+	s.variable_store['42'].assign(2)
+	s.variable_store['44'].assign(5)
+	s.variable_store['47'].assign(4)
+	s.variable_store['48'].assign(6)
 	
-	s.variable_store['41'].assign(8)
-	s.variable_store['42'].assign(7)
-	s.variable_store['43'].assign(4)
-	s.variable_store['47'].assign(5)
-	s.variable_store['48'].assign(1)
-	s.variable_store['49'].assign(9)
+	s.variable_store['53'].assign(4)
+	s.variable_store['57'].assign(8)
 	
-	s.variable_store['53'].assign(6)
-	s.variable_store['57'].assign(3)
+	s.variable_store['62'].assign(7)
+	s.variable_store['63'].assign(8)
+	s.variable_store['66'].assign(1)
+	s.variable_store['68'].assign(3)
 	
-	s.variable_store['61'].assign(3)
-	s.variable_store['62'].assign(1)
-	s.variable_store['63'].assign(2)
-	s.variable_store['67'].assign(7)
-	s.variable_store['68'].assign(6)
-	s.variable_store['69'].assign(4)
+	s.variable_store['73'].assign(5)
+	s.variable_store['75'].assign(7)
 	
-	s.variable_store['71'].assign(5)
-	s.variable_store['79'].assign(1)
+	s.variable_store['81'].assign(6)
+	s.variable_store['85'].assign(5)
+	s.variable_store['86'].assign(2)
+	s.variable_store['89'].assign(3)
 	
-	s.variable_store['84'].assign(7)
-	s.variable_store['86'].assign(9)
+	s.variable_store['92'].assign(3)
+	s.variable_store['93'].assign(7)
+	s.variable_store['96'].assign(6)
 	
-	s.variable_store['92'].assign(6)
-	s.variable_store['94'].assign(4)
-	s.variable_store['95'].assign(2)
-	s.variable_store['96'].assign(1)
-	s.variable_store['98'].assign(8)
+	
+	
 	
 	# solve the puzzle
 	solve(s)
-
+	
 if __name__ == "__main__":
 	# profiler for speed checking
 	cProfile.run('main()', 'SolverProfile')

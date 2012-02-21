@@ -42,12 +42,14 @@ class Space(object):
 					num, = self.variable_store[str(row) + str(col)].domain
 					string += str(num) + '  '
 				except ValueError:
-					string += '_  '
+					if not self.variable_store[str(row) + str(col)].domain:
+						string += 'E  '
+					else:
+						string += '_  '
 				
 			string += '\n'
 		string += '--------------------------'
 		return string
-		
 		
 	def copy(self):
 		"""

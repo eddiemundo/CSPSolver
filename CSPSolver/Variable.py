@@ -51,7 +51,11 @@ class Variable(object):
 		
 		Returns: True/False - whether or not the domain becomes empty 
 		"""
+		
+		
 		self.domain.difference_update(domain_values)
+		
+		
 		# if already assigned, and domain doesn't change then don't schedule
 		# anything. Kinda sloppy, but saves some CPU time
 		if not self.assigned:
@@ -64,6 +68,7 @@ class Variable(object):
 			return False
 		else:
 			return True
+		
 
 	def popFromDomain(self):
 		"""
@@ -100,20 +105,20 @@ class Variable(object):
 		self.pruneFromDomain(self.domain.symmetric_difference((i,)))
 		
 	# below is a very barebones listener pattern for only 2 events asn, and dmc
+	
 	def subscribe(self, props, cond):
 		"""
 		Input: An iterable props containing propagators, and a integer cond
 		
 		Function: Subscribes propagators in props to this variable for condition
 		cond. 
-		"""
-		pairs = [(p, self) for p in props] 
+		""" 
 		# can remove if statement by using classes for the conditions, but
 		# too much overhead
 		if cond == 0:
-			self.asn.extend(pairs)
+			self.asn.extend(props)
 		elif cond == 1:
-			self.asndmc.extend(pairs)
+			self.asndmc.extend(props)
 
 	def cancel(self, p, cond):
 		"""
@@ -136,8 +141,8 @@ class Variable(object):
 		Function: Schedules propagators listening to any event me
 		"""
 		if me == 0:
-			self.pq.extend(self.asn)
-			self.pq.extend(self.asndmc)
+			self.pq.extend([(p,self) for p in self.asn])
+			self.pq.extend([(p,self) for p in self.asndmc])
 		elif me == 1:
-			self.pq.extend(self.asndmc)
+			self.pq.extend([(p,self) for p in self.asndmc])
 	
