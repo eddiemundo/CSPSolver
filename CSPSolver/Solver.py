@@ -8,6 +8,7 @@ constraint propagator
 '''
 
 from Space import Space
+from collections import deque
 
 import cProfile
 import pstats
@@ -29,7 +30,7 @@ def branch(s):
 			s_copy.variable_store[vn].popFromDomain()
 			s.variable_store[vn].pruneFromDomain(s_copy.variable_store[vn].domain)
 			break
-	return s, s_copy
+	return s_copy, s
 
 def solve(s):
 	"""
@@ -37,26 +38,47 @@ def solve(s):
 	
 	Function: Prints solutions to the CSP
 	"""
-	variable_store = s.variable_store
-	pq = s.pq
-	
-	while pq:
-		pair = pq.popleft()
-		# if propagator prunes domain entirely
-		if (pair[0].propagate(pair[1], variable_store)):
+	s_pq_popleft = s.pq.popleft
+	while s.pq:
+		p, v = s_pq_popleft()
+		# if propagator failes a domain
+		if (p.propagate(v, s.variable_store)):
 			return
-	
 	
 	if s.assigned():
 		print(s)
 		return
 	
-	# no domain failed check, done in the propagator loop 
-
 	(s1, s2) = branch(s)
-	
-	solve(s1)
 	solve(s2)
+	solve(s1)
+	
+def loopSolve(s):
+	stack = deque((s,))
+	stack_pop = stack.pop
+	stack_push = stack.extend
+	
+	
+	while stack:
+		s = stack_pop()
+		failed = False
+		
+		while s.pq:
+			p, v = s.pq.popleft()
+			failed = p.propagate(v, s.variable_store) 
+			if failed:
+				break
+		if failed:
+			continue
+		
+		if s.assigned():
+			print(s)
+			continue
+		
+		stack_push(branch(s))
+		
+	
+	
 
 
 class AllDifferent(object):
@@ -185,7 +207,15 @@ def main():
 	s.variable_store['96'].assign(6)
 	
 	
+#	test_info = {}
+#	test_info['v1'] = (range(0,15), [])
+#	test_info['v2'] = (range(0,15), [])
+#	test_info['v3'] = (range(0,15), [])
+#	test_info['v4'] = (range(0,15), [])
+#	
+#	s2 = Space(test_info)
 	
+	#loopSolve(s2)
 	
 	# solve the puzzle
 	solve(s)

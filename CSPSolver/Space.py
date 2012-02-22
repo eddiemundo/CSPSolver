@@ -50,6 +50,7 @@ class Space(object):
 			string += '\n'
 		string += '--------------------------'
 		return string
+		#return str(self.variable_store)
 		
 	def copy(self):
 		"""
