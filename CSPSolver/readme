@@ -1,3 +1,5 @@
+Note: The final working version is in the Experimental branch. My bad.
+
 A constraint satisfaction problem solver. It is designed to solve problems
 involving a finite number of variables, each with finite integer domains. It
 solves these problems using contraints in the form of propagators, and search.
